@@ -585,3 +585,11 @@ func getImageData(filePath string) ([]byte, error) {
 
 	return buf, nil
 }
+
+func readPromptFromStdin() (string, error) {
+	stdin, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		return "", err
+	}
+	return string(stdin), err
+}

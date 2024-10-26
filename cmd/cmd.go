@@ -1172,6 +1172,13 @@ func generate(cmd *cobra.Command, opts runOptions) error {
 		return nil
 	}
 
+	if opts.Prompt == "-" {
+		opts.Prompt, err = readPromptFromStdin()
+		if err != nil {
+			return err
+		}
+	}
+
 	if opts.MultiModal {
 		opts.Prompt, opts.Images, err = extractFileData(opts.Prompt)
 		if err != nil {
