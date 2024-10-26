@@ -440,6 +440,28 @@ func RunHandler(cmd *cobra.Command, args []string) error {
 		opts.KeepAlive = &api.Duration{Duration: d}
 	}
 
+	parameters, err := cmd.Flags().GetStringArray("parameters")
+	if err != nil {
+		return err
+	}
+	if len(parameters) > 0 {
+		for _, param := range parameters {
+			parts := strings.Split(param, "=")
+			if len(parts) != 2 {
+				fmt.Println("Invalid parameter format, must be on format <key>=<value>" + param)
+				continue
+			}
+			key := parts[0]
+			value := parts[1]
+
+			fp, err := api.FormatParams(map[string][]string{key: {value}})
+			if err != nil {
+				return err
+			}
+			opts.Options[key] = fp[key]
+		}
+	}
+
 	prompts := args[1:]
 	// prepend stdin to the prompt if provided
 	if !term.IsTerminal(int(os.Stdin.Fd())) {
@@ -1380,6 +1402,7 @@ func NewCLI() *cobra.Command {
 	runCmd.Flags().Bool("insecure", false, "Use an insecure registry")
 	runCmd.Flags().Bool("nowordwrap", false, "Don't wrap words to the next line automatically")
 	runCmd.Flags().String("format", "", "Response format (e.g. json)")
+	runCmd.Flags().StringArray("parameters", []string{}, "Set parameters, e.g. num_ctx=8192")
 
 	stopCmd := &cobra.Command{
 		Use:     "stop MODEL",
